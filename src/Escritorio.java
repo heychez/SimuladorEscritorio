@@ -1,9 +1,18 @@
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.Collection;
+import java.util.Vector;
+import javax.swing.JList;
+import javax.swing.ListModel;
+import javax.swing.filechooser.FileSystemView;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author Roberto
@@ -15,6 +24,50 @@ public class Escritorio extends javax.swing.JFrame {
      */
     public Escritorio() {
         initComponents();
+
+        FileSystemView filesys = FileSystemView.getFileSystemView();
+        File roots[] = filesys.getRoots();
+        File escritorioDirectorio = filesys.getHomeDirectory();
+
+        File escritorioArchivos[] = filesys.getFiles(escritorioDirectorio, true);
+        Vector<File> files = new Vector();
+
+        for (int i = 0; i < escritorioArchivos.length; i++) {
+            files.add(escritorioArchivos[i]);
+        }
+
+        files.add(new File("C:\\$Recycle.Bin\\S-1-5-21-179979520-3747085381-430497232-1000"));
+
+        for (int i = 0; i < files.size(); i++) {
+            //System.out.println(files.elementAt(i).getPath());
+        }
+        // JList de archivos del escritorio
+        archivosJList.setListData(files);
+        archivosJList.setCellRenderer(new EscritorioCellRenderer());
+        archivosJList.setVisibleRowCount(0);
+        archivosJList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+
+        // listener del evento doble click en un elemento del JList
+        archivosJList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                JList list = (JList) evt.getSource();
+
+                // Double-click detected
+                if (evt.getClickCount() == 2) {
+                    int index = list.locationToIndex(evt.getPoint());
+                    ListModel model = list.getModel();
+                    File f = (File) model.getElementAt(index);
+                    System.out.println(f);
+
+                    if (String.valueOf(f).equals("Equipo")) {
+                        // Abrir la ventana de Equipo
+                        MiEquipo miEquipo = new MiEquipo();
+                        escritorio.add(miEquipo);
+                        miEquipo.show();
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -27,32 +80,29 @@ public class Escritorio extends javax.swing.JFrame {
     private void initComponents() {
 
         escritorio = new javax.swing.JDesktopPane();
-        jButton1 = new javax.swing.JButton();
+        archivosJScrollPane = new javax.swing.JScrollPane();
+        archivosJList = new javax.swing.JList();
         jPanel2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Escritorio");
+        setPreferredSize(new java.awt.Dimension(1200, 700));
 
         escritorio.setBackground(new java.awt.Color(255, 255, 255));
 
-        jButton1.setText("Equipo");
+        archivosJScrollPane.setViewportView(archivosJList);
 
         javax.swing.GroupLayout escritorioLayout = new javax.swing.GroupLayout(escritorio);
         escritorio.setLayout(escritorioLayout);
         escritorioLayout.setHorizontalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(escritorioLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton1)
-                .addContainerGap(705, Short.MAX_VALUE))
+            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 786, Short.MAX_VALUE)
         );
         escritorioLayout.setVerticalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(escritorioLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton1)
-                .addContainerGap(353, Short.MAX_VALUE))
+            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
         );
-        escritorio.setLayer(jButton1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        escritorio.setLayer(archivosJScrollPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         jPanel2.setBackground(new java.awt.Color(153, 153, 255));
 
@@ -60,7 +110,7 @@ public class Escritorio extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 786, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -121,8 +171,9 @@ public class Escritorio extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList archivosJList;
+    private javax.swing.JScrollPane archivosJScrollPane;
     private javax.swing.JDesktopPane escritorio;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
 }
