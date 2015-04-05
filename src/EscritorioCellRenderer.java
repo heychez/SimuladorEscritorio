@@ -22,7 +22,7 @@ public class EscritorioCellRenderer extends JLabel implements ListCellRenderer {
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         if (value instanceof File) {
             File file = (File) value;
-            setText(String.valueOf(file));
+            setText(FileSystemView.getFileSystemView().getSystemDisplayName(file));
             setIcon(FileSystemView.getFileSystemView().getSystemIcon(file));
             if (isSelected) {
                 setBackground(list.getSelectionBackground());
