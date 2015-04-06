@@ -30,18 +30,25 @@ public class Escritorio extends javax.swing.JFrame {
         File roots[] = filesys.getRoots();
         File escritorioDirectorio = filesys.getHomeDirectory();
 
-        File escritorioArchivos[] = filesys.getFiles(escritorioDirectorio, true);
+        File escritorioArchivos[] = escritorioDirectorio.listFiles();
         Vector<File> files = new Vector();
 
         for (int i = 0; i < escritorioArchivos.length; i++) {
+            // buscando la papelera
+            if (filesys.getSystemDisplayName(escritorioArchivos[i]).equals("Equipo")) {
+                File[] fs = escritorioArchivos[i].listFiles();
+                File[] fss = fs[0].listFiles();
+                for (int j = 0; j < fss.length; j++) {
+                    if (filesys.getSystemDisplayName(fss[j]).equals("$Recycle.Bin")) {
+                        File[] fsss = fss[j].listFiles();
+                        files.add(fsss[0]);
+                        System.out.println(fsss[0]);
+                    }
+                }
+            }
             files.add(escritorioArchivos[i]);
         }
 
-        files.add(new File("C:\\$Recycle.Bin\\S-1-5-21-179979520-3747085381-430497232-1000"));
-
-        for (int i = 0; i < files.size(); i++) {
-            //System.out.println(files.elementAt(i).getPath());
-        }
         // JList de archivos del escritorio
         archivosJList.setListData(files);
         archivosJList.setCellRenderer(new EscritorioCellRenderer());
@@ -60,7 +67,7 @@ public class Escritorio extends javax.swing.JFrame {
                     File f = (File) model.getElementAt(index);
                     System.out.println(f);
 
-                    if (String.valueOf(f).equals("Equipo")) {
+                    if (filesys.getSystemDisplayName(f).equals("Equipo")) {
                         // Abrir la ventana de Equipo
                         MiEquipo miEquipo = new MiEquipo();
                         escritorio.add(miEquipo);
@@ -99,7 +106,7 @@ public class Escritorio extends javax.swing.JFrame {
         escritorio.setLayout(escritorioLayout);
         escritorioLayout.setHorizontalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 786, Short.MAX_VALUE)
+            .addComponent(archivosJScrollPane)
         );
         escritorioLayout.setVerticalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
