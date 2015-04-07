@@ -24,18 +24,20 @@ public class EscritorioCellRenderer extends JLabel implements ListCellRenderer {
             File file = (File) value;
             setText(FileSystemView.getFileSystemView().getSystemDisplayName(file));
             setIcon(FileSystemView.getFileSystemView().getSystemIcon(file));
-            if (isSelected) {
-                setBackground(list.getSelectionBackground());
-                setForeground(list.getSelectionForeground());
-            } else {
-                setBackground(list.getBackground());
-                setForeground(list.getForeground());
-            }
-            setPreferredSize(new Dimension(150, 40));
-            setEnabled(list.isEnabled());
-            setFont(list.getFont());
-            setOpaque(true);
         }
+        if (isSelected) {
+            setBackground(list.getSelectionBackground());
+            setForeground(list.getSelectionForeground());
+        } else {
+            setBackground(list.getBackground());
+            setForeground(list.getForeground());
+        }
+
+        setPreferredSize(new Dimension(150, 40));
+        setEnabled(list.isEnabled());
+        setFont(list.getFont());
+        setOpaque(true);
+
         return this;
 
     }

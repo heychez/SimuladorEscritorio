@@ -1,9 +1,10 @@
 
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.Collection;
 import java.util.Vector;
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.ListModel;
@@ -27,48 +28,50 @@ public class Escritorio extends javax.swing.JFrame {
         initComponents();
 
         FileSystemView filesys = FileSystemView.getFileSystemView();
-        File roots[] = filesys.getRoots();
+        //File roots[] = filesys.getRoots();
         File escritorioDirectorio = filesys.getHomeDirectory();
 
-        File escritorioArchivos[] = escritorioDirectorio.listFiles();
-        Vector<File> files = new Vector();
+        File files[] = escritorioDirectorio.listFiles();
+        Vector<File> escritorioArchivos = new Vector();
 
-        for (int i = 0; i < escritorioArchivos.length; i++) {
+        for (int i = 0; i < files.length; i++) {
             // buscando la papelera
-            if (filesys.getSystemDisplayName(escritorioArchivos[i]).equals("Equipo")) {
-                File[] fs = escritorioArchivos[i].listFiles();
+            if (filesys.getSystemDisplayName(files[i]).equals("Equipo")) {
+                File[] fs = files[i].listFiles();
                 File[] fss = fs[0].listFiles();
                 for (int j = 0; j < fss.length; j++) {
                     if (filesys.getSystemDisplayName(fss[j]).equals("$Recycle.Bin")) {
                         File[] fsss = fss[j].listFiles();
-                        files.add(fsss[0]);
+                        escritorioArchivos.add(fsss[0]);
                         System.out.println(fsss[0]);
                     }
                 }
             }
-            files.add(escritorioArchivos[i]);
+            escritorioArchivos.add(files[i]);
         }
 
         // JList de archivos del escritorio
-        archivosJList.setListData(files);
+        archivosJList.setListData(escritorioArchivos);
         archivosJList.setCellRenderer(new EscritorioCellRenderer());
         archivosJList.setVisibleRowCount(0);
         archivosJList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
+        //Image fondo = new ImageIcon(this.getClass().getResource("/img/win7.png")).getImage();
         // listener del evento doble click en un elemento del JList
         archivosJList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 JList list = (JList) evt.getSource();
-
+                java.awt.Rectangle r = list.getCellBounds(0, list.getLastVisibleIndex());
                 // Double-click detected
-                if (evt.getClickCount() == 2) {
-                    int index = list.locationToIndex(evt.getPoint());
+                if (evt.getClickCount() == 2 && r != null && r.contains(evt.getPoint())) {
+                    //int index = list.locationToIndex(evt.getPoint());
+                    int index = list.getSelectedIndex();
                     ListModel model = list.getModel();
                     File f = (File) model.getElementAt(index);
                     System.out.println(f);
 
+                    // Abrir la ventana de Equipo
                     if (filesys.getSystemDisplayName(f).equals("Equipo")) {
-                        // Abrir la ventana de Equipo
                         MiEquipo miEquipo = new MiEquipo();
                         escritorio.add(miEquipo);
                         miEquipo.show();
@@ -96,27 +99,39 @@ public class Escritorio extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Escritorio");
-        setPreferredSize(new java.awt.Dimension(1200, 700));
+        setIconImage((new ImageIcon(this.getClass().getResource("/img/desktop-icon-2.png"))).getImage());
+        setPreferredSize(new java.awt.Dimension(1218, 646));
 
-        escritorio.setBackground(new java.awt.Color(255, 255, 255));
+        escritorio.setBackground(new java.awt.Color(240, 240, 240));
+        escritorio.setPreferredSize(new java.awt.Dimension(1200, 550));
 
+        archivosJScrollPane.setBorder(null);
+        archivosJScrollPane.setHorizontalScrollBar(null);
+        archivosJScrollPane.setPreferredSize(new java.awt.Dimension(1200, 550));
+
+        archivosJList.setPreferredSize(new java.awt.Dimension(1200, 550));
         archivosJScrollPane.setViewportView(archivosJList);
 
         javax.swing.GroupLayout escritorioLayout = new javax.swing.GroupLayout(escritorio);
         escritorio.setLayout(escritorioLayout);
         escritorioLayout.setHorizontalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(archivosJScrollPane)
+            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
         );
         escritorioLayout.setVerticalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
         );
         escritorio.setLayer(archivosJScrollPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         jPanel2.setBackground(new java.awt.Color(153, 153, 255));
+        jPanel2.setPreferredSize(new java.awt.Dimension(1200, 50));
 
-        jButton1.setText("Inicio");
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/win-start-icon-50x50.png"))); // NOI18N
+        jButton1.setBorder(null);
+        jButton1.setBorderPainted(false);
+        jButton1.setFocusable(false);
+        jButton1.setPreferredSize(new java.awt.Dimension(50, 50));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -128,25 +143,27 @@ public class Escritorio extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 55, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(escritorio)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(escritorio, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(escritorio)
+                .addComponent(escritorio, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -157,20 +174,19 @@ public class Escritorio extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         jPopupMenu1.removeAll();
         this.repaint();
-        
+
         String inicioPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs";
-        File files[]= (new File(inicioPath)).listFiles();
+        File files[] = (new File(inicioPath)).listFiles();
         FileSystemView fsv = FileSystemView.getFileSystemView();
         for (int i = 0; i < files.length; i++) {
             JMenuItem ex = new JMenuItem(files[i].getName());
             ex.setIcon(fsv.getSystemIcon(files[i]));
             jPopupMenu1.add(ex);
         }
-        
+
         JMenuItem ex = new JMenuItem("wat");
-        
-        
-        jPopupMenu1.show(jButton1,0,-jPopupMenu1.getPreferredSize().height);
+
+        jPopupMenu1.show(jButton1, 0, -jPopupMenu1.getPreferredSize().height);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
