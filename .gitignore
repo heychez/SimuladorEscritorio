@@ -6,3 +6,5 @@ nbdist/
 nbactions.xml
 nb-configuration.xml
 .nb-gradle/
+nbproject/build-impl.xml
+nbproject/genfiles.properties
