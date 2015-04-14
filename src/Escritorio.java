@@ -10,8 +10,12 @@ import java.util.Date;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileSystemView;
 
@@ -32,6 +36,33 @@ public class Escritorio extends javax.swing.JFrame {
     public Escritorio() {
         initComponents();
 
+        JPopupMenu clickDerechoInMenu = new JPopupMenu();
+        JMenuItem abrirItem = new JMenuItem("Abrir");
+        JMenuItem cortarItem = new JMenuItem("Cortar");
+        JMenuItem copiarItem = new JMenuItem("Copiar");
+        JMenuItem eliminarItem = new JMenuItem("Eliminar");
+        clickDerechoInMenu.add(abrirItem);
+        clickDerechoInMenu.addSeparator();
+        clickDerechoInMenu.add(cortarItem);
+        clickDerechoInMenu.add(copiarItem);
+        clickDerechoInMenu.add(eliminarItem);
+
+        JPopupMenu clickDerechoOutMenu = new JPopupMenu();
+        JMenu nuevoItem = new JMenu("Nuevo");
+        JMenuItem nuevaCarpetaItem = new JMenuItem("Carpeta");
+        JMenuItem nuevoAccesoDirectoItem = new JMenuItem("Acceso directo");
+        JMenuItem nuevoWordItem = new JMenuItem("Documento Word");
+        JMenuItem nuevoExcelItem = new JMenuItem("Documento Excel");
+        JMenuItem pegarItem = new JMenuItem("Pegar");
+        clickDerechoOutMenu.add(nuevoItem);
+        nuevoItem.add(nuevaCarpetaItem);
+        nuevoItem.add(nuevoAccesoDirectoItem);
+        nuevoItem.addSeparator();
+        nuevoItem.add(nuevoWordItem);
+        nuevoItem.add(nuevoExcelItem);
+        clickDerechoOutMenu.addSeparator();
+        clickDerechoOutMenu.add(pegarItem);
+
         FileSystemView filesys = FileSystemView.getFileSystemView();
         //File roots[] = filesys.getRoots();
         File escritorioDirectorio = filesys.getHomeDirectory();
@@ -42,22 +73,21 @@ public class Escritorio extends javax.swing.JFrame {
         for (int i = 0; i < files.length; i++) {
             // buscando la papelera
             /*
-            if (filesys.getSystemDisplayName(files[i]).equals("Equipo")) {
-                File[] fs = files[i].listFiles();
-                File[] fss = fs[0].listFiles();
-                for (int j = 0; j < fss.length; j++) {
-                    if (filesys.getSystemDisplayName(fss[j]).equals("$Recycle.Bin")) {
-                        File[] fsss = fss[j].listFiles();
-                        escritorioArchivos.add(fsss[0]);
-                        System.out.println(fsss[0].getName());
-                    }
-                }
-            }
-            */
+             if (filesys.getSystemDisplayName(files[i]).equals("Equipo")) {
+             File[] fs = files[i].listFiles();
+             File[] fss = fs[0].listFiles();
+             for (int j = 0; j < fss.length; j++) {
+             if (filesys.getSystemDisplayName(fss[j]).equals("$Recycle.Bin")) {
+             File[] fsss = fss[j].listFiles();
+             escritorioArchivos.add(fsss[0]);
+             System.out.println(fsss[0].getName());
+             }
+             }
+             }
+             */
             escritorioArchivos.add(files[i]);
         }
-        
-        
+
         //Papelera 
         File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
         escritorioArchivos.add(papelera);
@@ -71,54 +101,64 @@ public class Escritorio extends javax.swing.JFrame {
         //Image fondo = new ImageIcon(this.getClass().getResource("/img/win7.png")).getImage();
         // listener del evento doble click en un elemento del JList
         archivosJList.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
+            public void mousePressed(MouseEvent evt) {
                 JList list = (JList) evt.getSource();
                 java.awt.Rectangle r = list.getCellBounds(0, list.getLastVisibleIndex());
-                // Double-click detected
-                if (evt.getClickCount() == 2 && r != null && r.contains(evt.getPoint())) {
-                    //int index = list.locationToIndex(evt.getPoint());
-                    int index = list.getSelectedIndex();
-                    ListModel model = list.getModel();
-                    File f = (File) model.getElementAt(index);
-                    System.out.println(f);
 
-                    // Abrir la ventana de Equipo
-                    //El nombre del equipo depende del sistema , en mi maquina se llama Este equipo xd.
-                    if (filesys.getSystemDisplayName(f).contains("equipo")) {
-                        MiEquipo miEquipo = new MiEquipo();
-                        escritorio.add(miEquipo);
-                        miEquipo.show();
+                if (r.contains(evt.getPoint())) {
+                    if (SwingUtilities.isLeftMouseButton(evt)) {
+                        //r != null
+                        if (evt.getClickCount() == 2) {
+                            //int index = list.locationToIndex(evt.getPoint());
+                            int index = list.getSelectedIndex();
+                            ListModel model = list.getModel();
+                            File f = (File) model.getElementAt(index);
+                            String nombreDeArchivo = filesys.getSystemDisplayName(f).toLowerCase();
+                            System.out.println(nombreDeArchivo);
+
+                            if (nombreDeArchivo.contains("equipo")) {
+                                MiEquipo miEquipo = new MiEquipo();
+                                escritorio.add(miEquipo);
+                                miEquipo.show();
+                            }
+
+                            if (nombreDeArchivo.contains("reciclaje")) {
+                                PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
+                                escritorio.add(papeleraReciclaje);
+                                papeleraReciclaje.show();
+                            }
+                        }
+                    } else { //click derecho
+                        if (evt.getClickCount() == 1) {
+                            int index = list.locationToIndex(evt.getPoint());
+                            list.setSelectedIndex(index);
+
+                            clickDerechoInMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+                        }
                     }
-                    
-                    if (filesys.getSystemDisplayName(f).contains("reciclaje")) {
-                        PapeleraReciclaje pr = new PapeleraReciclaje();
-                        escritorio.add(pr);
-                        pr.show();
+                } else {
+                    list.clearSelection();
+                    if (SwingUtilities.isRightMouseButton(evt)) {
+                        clickDerechoOutMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                     }
-                    
                 }
             }
         });
-        
-        ///Reloj de Barra
-        SimpleDateFormat sdf1 = new SimpleDateFormat("HH:mm:ss");
-        SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yy");
-        ActionListener updateClock = new ActionListener(){
 
+        ///Reloj de Barra
+        SimpleDateFormat sdf1 = new SimpleDateFormat("HH:mm a");
+        SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
+        ActionListener updateClock = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Date d = new Date();
-                 jLabel1.setText(sdf1.format(d)); 
-                 jLabel2.setText(sdf2.format(d));
+                fechaHoraLabel.setText("<html>" + sdf1.format(d) + " <br>" + sdf2.format(d) + "</html>");
             }
-     
         };
-                
-        Timer t = new Timer(1000,updateClock);
+
+        Timer t = new Timer(1000, updateClock);
         t.start();
-        
-        
-        
+
     }
 
     /**
@@ -136,8 +176,7 @@ public class Escritorio extends javax.swing.JFrame {
         archivosJList = new javax.swing.JList();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        fechaHoraLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Escritorio");
@@ -169,9 +208,12 @@ public class Escritorio extends javax.swing.JFrame {
         jPanel2.setBackground(new java.awt.Color(153, 153, 255));
         jPanel2.setPreferredSize(new java.awt.Dimension(1200, 50));
 
+        jButton1.setBackground(new java.awt.Color(153, 153, 255));
+        jButton1.setForeground(new java.awt.Color(153, 153, 255));
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/win-start-icon-50x50.png"))); // NOI18N
         jButton1.setBorder(null);
         jButton1.setBorderPainted(false);
+        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jButton1.setFocusable(false);
         jButton1.setPreferredSize(new java.awt.Dimension(50, 50));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -180,6 +222,9 @@ public class Escritorio extends javax.swing.JFrame {
             }
         });
 
+        fechaHoraLabel.setForeground(new java.awt.Color(255, 255, 255));
+        fechaHoraLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -187,22 +232,15 @@ public class Escritorio extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(fechaHoraLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(1, 1, 1))
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
+                    .addComponent(fechaHoraLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -236,8 +274,6 @@ public class Escritorio extends javax.swing.JFrame {
             ex.setIcon(fsv.getSystemIcon(files[i]));
             jPopupMenu1.add(ex);
         }
-
-        
 
         jPopupMenu1.show(jButton1, 0, -jPopupMenu1.getPreferredSize().height);
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -281,9 +317,8 @@ public class Escritorio extends javax.swing.JFrame {
     private javax.swing.JList archivosJList;
     private javax.swing.JScrollPane archivosJScrollPane;
     private javax.swing.JDesktopPane escritorio;
+    private javax.swing.JLabel fechaHoraLabel;
     private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
     // End of variables declaration//GEN-END:variables
