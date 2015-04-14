@@ -24,6 +24,8 @@ public class EscritorioCellRenderer extends JLabel implements ListCellRenderer {
             File file = (File) value;
             setText(FileSystemView.getFileSystemView().getSystemDisplayName(file));
             setIcon(FileSystemView.getFileSystemView().getSystemIcon(file));
+            
+            
         }
         if (isSelected) {
             setBackground(list.getSelectionBackground());

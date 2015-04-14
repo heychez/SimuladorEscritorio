@@ -1,3 +1,13 @@
+
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.Vector;
+import javax.swing.JList;
+import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileSystemView;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -9,12 +19,42 @@
  * @author Roberto
  */
 public class PapeleraReciclaje extends javax.swing.JInternalFrame {
-
+    File[] papelera = (new File("C:/$Recycle.Bin")).listFiles()[0].listFiles();
+    FileSystemView fsv = FileSystemView.getFileSystemView();
+    Vector<File> papeleraArchivos = new Vector();
     /**
      * Creates new form PapeleraReciclaje
      */
     public PapeleraReciclaje() {
         initComponents();
+        for (int i = 0; i < papelera.length; i++) {
+            if(!fsv.isHiddenFile(papelera[i])){
+                papeleraArchivos.add(papelera[i]);
+            }
+            
+        }
+        jList1.setListData(papeleraArchivos);
+        jList1.setCellRenderer(new EscritorioCellRenderer());
+        jList1.setVisibleRowCount(0);
+        jList1.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        
+        //Falta Terminar - Restaurar archivo y pequeños menus de reciclaje
+        jList1.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent evt) {
+                JList list = (JList) evt.getSource();
+                java.awt.Rectangle r = list.getCellBounds(0, list.getLastVisibleIndex());
+                if(SwingUtilities.isRightMouseButton(evt)){
+                    if (evt.getClickCount() == 1 && r != null && r.contains(evt.getPoint())) {
+                        //int index = list.locationToIndex(evt.getPoint());
+                        int index = list.getSelectedIndex();
+                        ListModel model = list.getModel();
+                        //File f = (File) model.getElementAt(index);
+                        System.out.println(index);
+                        }
+                    }
+            }
+        });
     }
 
     /**
@@ -26,21 +66,27 @@ public class PapeleraReciclaje extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList();
+
         setClosable(true);
         setIconifiable(true);
         setMaximizable(true);
         setResizable(true);
         setTitle("Papelera de reciclaje");
 
+        jList1.setBackground(new java.awt.Color(240, 240, 240));
+        jScrollPane1.setViewportView(jList1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 394, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 624, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
         );
 
         pack();
@@ -48,5 +94,7 @@ public class PapeleraReciclaje extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList jList1;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }

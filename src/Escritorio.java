@@ -41,6 +41,7 @@ public class Escritorio extends javax.swing.JFrame {
 
         for (int i = 0; i < files.length; i++) {
             // buscando la papelera
+            /*
             if (filesys.getSystemDisplayName(files[i]).equals("Equipo")) {
                 File[] fs = files[i].listFiles();
                 File[] fss = fs[0].listFiles();
@@ -48,12 +49,18 @@ public class Escritorio extends javax.swing.JFrame {
                     if (filesys.getSystemDisplayName(fss[j]).equals("$Recycle.Bin")) {
                         File[] fsss = fss[j].listFiles();
                         escritorioArchivos.add(fsss[0]);
-                        System.out.println(fsss[0]);
+                        System.out.println(fsss[0].getName());
                     }
                 }
             }
+            */
             escritorioArchivos.add(files[i]);
         }
+        
+        
+        //Papelera 
+        File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
+        escritorioArchivos.add(papelera);
 
         // JList de archivos del escritorio
         archivosJList.setListData(escritorioArchivos);
@@ -76,11 +83,19 @@ public class Escritorio extends javax.swing.JFrame {
                     System.out.println(f);
 
                     // Abrir la ventana de Equipo
-                    if (filesys.getSystemDisplayName(f).equals("Equipo")) {
+                    //El nombre del equipo depende del sistema , en mi maquina se llama Este equipo xd.
+                    if (filesys.getSystemDisplayName(f).contains("equipo")) {
                         MiEquipo miEquipo = new MiEquipo();
                         escritorio.add(miEquipo);
                         miEquipo.show();
                     }
+                    
+                    if (filesys.getSystemDisplayName(f).contains("reciclaje")) {
+                        PapeleraReciclaje pr = new PapeleraReciclaje();
+                        escritorio.add(pr);
+                        pr.show();
+                    }
+                    
                 }
             }
         });
@@ -222,7 +237,7 @@ public class Escritorio extends javax.swing.JFrame {
             jPopupMenu1.add(ex);
         }
 
-        JMenuItem ex = new JMenuItem("wat");
+        
 
         jPopupMenu1.show(jButton1, 0, -jPopupMenu1.getPreferredSize().height);
     }//GEN-LAST:event_jButton1ActionPerformed
