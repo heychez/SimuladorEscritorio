@@ -27,6 +27,7 @@ public class PapeleraReciclaje extends javax.swing.JInternalFrame {
      */
     public PapeleraReciclaje() {
         initComponents();
+        
         for (int i = 0; i < papelera.length; i++) {
             if(!fsv.isHiddenFile(papelera[i])){
                 papeleraArchivos.add(papelera[i]);
@@ -74,6 +75,7 @@ public class PapeleraReciclaje extends javax.swing.JInternalFrame {
         setMaximizable(true);
         setResizable(true);
         setTitle("Papelera de reciclaje");
+        setFrameIcon(new javax.swing.ImageIcon(getClass().getResource("/img/papelera-vacia-icon.png"))); // NOI18N
 
         jList1.setBackground(new java.awt.Color(240, 240, 240));
         jScrollPane1.setViewportView(jList1);

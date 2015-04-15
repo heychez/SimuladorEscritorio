@@ -180,7 +180,7 @@ public class Escritorio extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Escritorio");
-        setIconImage((new ImageIcon(this.getClass().getResource("/img/desktop-icon-2.png"))).getImage());
+        setIconImage((new ImageIcon(this.getClass().getResource("/img/desktop-icon-3.png"))).getImage());
         setPreferredSize(new java.awt.Dimension(1218, 646));
 
         escritorio.setBackground(new java.awt.Color(240, 240, 240));
