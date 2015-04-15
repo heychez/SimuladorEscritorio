@@ -1,13 +1,18 @@
 
+
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -120,13 +125,19 @@ public class Escritorio extends javax.swing.JFrame {
                                 MiEquipo miEquipo = new MiEquipo();
                                 escritorio.add(miEquipo);
                                 miEquipo.show();
-                            }
-
-                            if (nombreDeArchivo.contains("reciclaje")) {
+                            } else if (nombreDeArchivo.contains("reciclaje")) {
                                 PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
                                 escritorio.add(papeleraReciclaje);
                                 papeleraReciclaje.show();
+                            }else{
+                                Desktop d = Desktop.getDesktop();
+                                try {
+                                    d.browse(f.toURI());
+                                } catch (IOException ex) {
+                                    Logger.getLogger(Escritorio.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                             }
+
                         }
                     } else { //click derecho
                         if (evt.getClickCount() == 1) {
@@ -205,7 +216,7 @@ public class Escritorio extends javax.swing.JFrame {
         );
         escritorio.setLayer(archivosJScrollPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        jPanel2.setBackground(new java.awt.Color(153, 153, 255));
+        jPanel2.setBackground(new java.awt.Color(51, 153, 255));
         jPanel2.setPreferredSize(new java.awt.Dimension(1200, 50));
 
         jButton1.setBackground(new java.awt.Color(153, 153, 255));

@@ -1,6 +1,7 @@
 
 import java.awt.Image;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -20,7 +21,7 @@ import javax.swing.table.TableModel;
 public class MiEquipo extends javax.swing.JInternalFrame {
 
     FileSystemView fsv = FileSystemView.getFileSystemView();
-
+    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
     /**
      * Creates new form MiEquipo
      */
@@ -31,9 +32,9 @@ public class MiEquipo extends javax.swing.JInternalFrame {
 
         for (int i = 0; i < roots.length; i++) {
             Vector v = new Vector();
-            v.add((Icon) fsv.getSystemIcon(roots[i]));
+            //v.add((Icon) fsv.getSystemIcon(roots[i]));
             v.add(fsv.getSystemDisplayName(roots[i]));
-            v.add("Marzo 2015");
+            v.add(sdf.format(roots[i].lastModified()));
             v.add(fsv.getSystemTypeDescription(roots[i]));
             v.add(roots[i].getTotalSpace() / (1024 * 1024 * 1024) + " GB");
 
@@ -78,14 +79,14 @@ public class MiEquipo extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "", "Nombre", "Fecha de modificacion", "Tipo", "Tamaño"
+                "Nombre", "Fecha de modificacion", "Tipo", "Tamaño"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
