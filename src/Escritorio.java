@@ -68,35 +68,42 @@ public class Escritorio extends javax.swing.JFrame {
         clickDerechoOutMenu.addSeparator();
         clickDerechoOutMenu.add(pegarItem);
 
-        FileSystemView filesys = FileSystemView.getFileSystemView();
-        //File roots[] = filesys.getRoots();
-        File escritorioDirectorio = filesys.getHomeDirectory();
-
-        File files[] = escritorioDirectorio.listFiles();
+        FileSystemView filesys = FileSystemView.getFileSystemView();       
         Vector<File> escritorioArchivos = new Vector();
-
-        for (int i = 0; i < files.length; i++) {
-            // buscando la papelera
-            /*
-             if (filesys.getSystemDisplayName(files[i]).equals("Equipo")) {
-             File[] fs = files[i].listFiles();
-             File[] fss = fs[0].listFiles();
-             for (int j = 0; j < fss.length; j++) {
-             if (filesys.getSystemDisplayName(fss[j]).equals("$Recycle.Bin")) {
-             File[] fsss = fss[j].listFiles();
-             escritorioArchivos.add(fsss[0]);
-             System.out.println(fsss[0].getName());
-             }
-             }
-             }
-             */
-            escritorioArchivos.add(files[i]);
-        }
-
-        //Papelera 
+        
+        //Uno antes debe ir mi equipo
+        
+        
+        //Mis documentos
+        String pathDocumentos = System.getProperty("user.home");
+        File documentos = new File(pathDocumentos);
+        escritorioArchivos.add(documentos);
+        
+        
+        //Papelera
         File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
         escritorioArchivos.add(papelera);
+        
+        //Red
+        File red;        
+      
+        
+        
+        //Iconos de escritorio
+        String pathDesktop = System.getProperty("user.home") + "/Desktop";
+        File escritorioDirectorio = new File(pathDesktop);
+        File files[] = escritorioDirectorio.listFiles();
+       
+        for (int i = 0; i < files.length; i++) {
+            if(!filesys.isHiddenFile(files[i])){
+                escritorioArchivos.add(files[i]);
+            }
+        }
 
+      
+
+        
+        
         // JList de archivos del escritorio
         archivosJList.setListData(escritorioArchivos);
         archivosJList.setCellRenderer(new EscritorioCellRenderer());
@@ -119,8 +126,10 @@ public class Escritorio extends javax.swing.JFrame {
                             ListModel model = list.getModel();
                             File f = (File) model.getElementAt(index);
                             String nombreDeArchivo = filesys.getSystemDisplayName(f).toLowerCase();
+                            
                             System.out.println(nombreDeArchivo);
-
+                            System.out.println(System.getProperty("user.name")); 
+                            
                             if (nombreDeArchivo.contains("equipo")) {
                                 MiEquipo miEquipo = new MiEquipo();
                                 escritorio.add(miEquipo);
@@ -129,6 +138,10 @@ public class Escritorio extends javax.swing.JFrame {
                                 PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
                                 escritorio.add(papeleraReciclaje);
                                 papeleraReciclaje.show();
+                            }else if(nombreDeArchivo.contains(System.getProperty("user.name").toLowerCase())){
+                                Documentos documentos = new Documentos();
+                                escritorio.add(documentos);
+                                documentos.show();
                             }else{
                                 Desktop d = Desktop.getDesktop();
                                 try {

@@ -27,6 +27,12 @@ public class MiEquipo extends javax.swing.JInternalFrame {
      */
     public MiEquipo() {
         initComponents();
+        addVolumenes();
+        //Cosas que tiene Equipo
+
+    }
+
+    private void addVolumenes() {
         File roots[] = File.listRoots();
         DefaultTableModel dtm = (DefaultTableModel) jTable1.getModel();
 
@@ -40,12 +46,6 @@ public class MiEquipo extends javax.swing.JInternalFrame {
 
             dtm.addRow(v);
         }
-        //Cosas que tiene Equipo
-
-    }
-
-    private void addVolumenes() {
-
     }
 
     /**
