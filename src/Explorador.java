@@ -18,31 +18,43 @@ import javax.swing.table.TableModel;
  *
  * @author Roberto
  */
-public class MiEquipo extends javax.swing.JInternalFrame {
+public class Explorador extends javax.swing.JInternalFrame {
 
+    File[] archivosIniciales;
+    String ventanaTitulo;
+    ImageIcon ventanaIcono;
     FileSystemView fsv = FileSystemView.getFileSystemView();
     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
     /**
      * Creates new form MiEquipo
      */
-    public MiEquipo() {
+    public Explorador() {
+        this.archivosIniciales = new File[]{};
+        this.ventanaTitulo = "";
+        this.ventanaIcono = null;
         initComponents();
-        addVolumenes();
-        //Cosas que tiene Equipo
-
     }
 
-    private void addVolumenes() {
-        File roots[] = File.listRoots();
-        DefaultTableModel dtm = (DefaultTableModel) jTable1.getModel();
+    public Explorador(File[] archivosIniciales, String ventanaTitulo, ImageIcon ventanaIcono) {
+        this.archivosIniciales = archivosIniciales;
+        this.ventanaTitulo = ventanaTitulo;
+        this.ventanaIcono = ventanaIcono;
+        initComponents();
 
-        for (int i = 0; i < roots.length; i++) {
+        ponerArchivosIniciales();
+    }
+
+    private void ponerArchivosIniciales() {
+        DefaultTableModel dtm = (DefaultTableModel) tablaArchivos.getModel();
+
+        for (int i = 0; i < archivosIniciales.length; i++) {
             Vector v = new Vector();
             //v.add((Icon) fsv.getSystemIcon(roots[i]));
-            v.add(fsv.getSystemDisplayName(roots[i]));
-            v.add(sdf.format(roots[i].lastModified()));
-            v.add(fsv.getSystemTypeDescription(roots[i]));
-            v.add(roots[i].getTotalSpace() / (1024 * 1024 * 1024) + " GB");
+            v.add(fsv.getSystemDisplayName(archivosIniciales[i]));
+            v.add(sdf.format(archivosIniciales[i].lastModified()));
+            v.add(fsv.getSystemTypeDescription(archivosIniciales[i]));
+            v.add(archivosIniciales[i].getTotalSpace() / (1024 * 1024 * 1024) + " GB");
 
             dtm.addRow(v);
         }
@@ -58,23 +70,23 @@ public class MiEquipo extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         jDesktopPane2 = new javax.swing.JDesktopPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        panelTabla = new javax.swing.JScrollPane();
+        tablaArchivos = new javax.swing.JTable();
         jDesktopPane3 = new javax.swing.JDesktopPane();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jTree2 = new javax.swing.JTree();
-        jTextField1 = new javax.swing.JTextField();
+        panelArbol = new javax.swing.JScrollPane();
+        arbolArchivos = new javax.swing.JTree();
+        campoRuta = new javax.swing.JTextField();
 
         setClosable(true);
         setIconifiable(true);
         setMaximizable(true);
         setResizable(true);
-        setTitle("Mi Equipo");
-        setFrameIcon(new javax.swing.ImageIcon(getClass().getResource("/img/equipo-icon.png"))); // NOI18N
+        setTitle(ventanaTitulo);
+        setFrameIcon(ventanaIcono);
 
         jDesktopPane2.setBackground(new java.awt.Color(153, 255, 204));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tablaArchivos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -97,48 +109,48 @@ public class MiEquipo extends javax.swing.JInternalFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jTable1.setIntercellSpacing(new java.awt.Dimension(2, 2));
-        jTable1.setRowHeight(20);
-        jTable1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jTable1.setShowHorizontalLines(false);
-        jTable1.setShowVerticalLines(false);
-        jTable1.getTableHeader().setResizingAllowed(false);
-        jTable1.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(jTable1);
+        tablaArchivos.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        tablaArchivos.setIntercellSpacing(new java.awt.Dimension(2, 2));
+        tablaArchivos.setRowHeight(20);
+        tablaArchivos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        tablaArchivos.setShowHorizontalLines(false);
+        tablaArchivos.setShowVerticalLines(false);
+        tablaArchivos.getTableHeader().setResizingAllowed(false);
+        tablaArchivos.getTableHeader().setReorderingAllowed(false);
+        panelTabla.setViewportView(tablaArchivos);
 
         javax.swing.GroupLayout jDesktopPane2Layout = new javax.swing.GroupLayout(jDesktopPane2);
         jDesktopPane2.setLayout(jDesktopPane2Layout);
         jDesktopPane2Layout.setHorizontalGroup(
             jDesktopPane2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
+            .addComponent(panelTabla, javax.swing.GroupLayout.DEFAULT_SIZE, 432, Short.MAX_VALUE)
         );
         jDesktopPane2Layout.setVerticalGroup(
             jDesktopPane2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addComponent(panelTabla, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
-        jDesktopPane2.setLayer(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jDesktopPane2.setLayer(panelTabla, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         jDesktopPane3.setBackground(new java.awt.Color(204, 255, 204));
 
-        jScrollPane4.setViewportView(jTree2);
+        panelArbol.setViewportView(arbolArchivos);
 
         javax.swing.GroupLayout jDesktopPane3Layout = new javax.swing.GroupLayout(jDesktopPane3);
         jDesktopPane3.setLayout(jDesktopPane3Layout);
         jDesktopPane3Layout.setHorizontalGroup(
             jDesktopPane3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
+            .addComponent(panelArbol, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)
         );
         jDesktopPane3Layout.setVerticalGroup(
             jDesktopPane3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
+            .addComponent(panelArbol, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
         );
-        jDesktopPane3.setLayer(jScrollPane4, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jDesktopPane3.setLayer(panelArbol, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        jTextField1.setText("Equipo");
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+        campoRuta.setText("Equipo");
+        campoRuta.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
+                campoRutaActionPerformed(evt);
             }
         });
 
@@ -150,12 +162,12 @@ public class MiEquipo extends javax.swing.JInternalFrame {
                 .addComponent(jDesktopPane3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jDesktopPane2))
-            .addComponent(jTextField1)
+            .addComponent(campoRuta)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(campoRuta, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jDesktopPane2)
@@ -165,18 +177,18 @@ public class MiEquipo extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void campoRutaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_campoRutaActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_campoRutaActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTree arbolArchivos;
+    private javax.swing.JTextField campoRuta;
     private javax.swing.JDesktopPane jDesktopPane2;
     private javax.swing.JDesktopPane jDesktopPane3;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTree jTree2;
+    private javax.swing.JScrollPane panelArbol;
+    private javax.swing.JScrollPane panelTabla;
+    private javax.swing.JTable tablaArchivos;
     // End of variables declaration//GEN-END:variables
 }

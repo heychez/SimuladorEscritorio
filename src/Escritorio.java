@@ -1,5 +1,4 @@
 
-
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -35,6 +34,9 @@ import javax.swing.filechooser.FileSystemView;
  */
 public class Escritorio extends javax.swing.JFrame {
 
+    FileSystemView fsv = FileSystemView.getFileSystemView();
+    Vector<File> escritorioArchivos = new Vector();
+
     /**
      * Creates new form Escritorio
      */
@@ -68,51 +70,40 @@ public class Escritorio extends javax.swing.JFrame {
         clickDerechoOutMenu.addSeparator();
         clickDerechoOutMenu.add(pegarItem);
 
-        FileSystemView filesys = FileSystemView.getFileSystemView();       
-        Vector<File> escritorioArchivos = new Vector();
-        
         //Uno antes debe ir mi equipo
-        
-        
         //Mis documentos
         String pathDocumentos = System.getProperty("user.home");
         File documentos = new File(pathDocumentos);
         escritorioArchivos.add(documentos);
-        
-        
+
         //Papelera
         File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
         escritorioArchivos.add(papelera);
-        
+
         //Red
-        File red;        
-      
-        
-        
+        File red;
+
         //Iconos de escritorio
         String pathDesktop = System.getProperty("user.home") + "/Desktop";
         File escritorioDirectorio = new File(pathDesktop);
-        File files[] = escritorioDirectorio.listFiles();
-       
+        //File files[] = escritorioDirectorio.listFiles();
+        File[] files = fsv.getHomeDirectory().listFiles();
+
         for (int i = 0; i < files.length; i++) {
-            if(!filesys.isHiddenFile(files[i])){
-                escritorioArchivos.add(files[i]);
-            }
+            //if (!fsv.isHiddenFile(files[i])) {
+            escritorioArchivos.add(files[i]);
+            //}
         }
 
-      
-
-        
-        
         // JList de archivos del escritorio
-        archivosJList.setListData(escritorioArchivos);
-        archivosJList.setCellRenderer(new EscritorioCellRenderer());
-        archivosJList.setVisibleRowCount(0);
-        archivosJList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        listaArchivos.setListData(escritorioArchivos);
+        listaArchivos.setCellRenderer(new EscritorioCellRenderer());
+        listaArchivos.setVisibleRowCount(0);
+        listaArchivos.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
         //Image fondo = new ImageIcon(this.getClass().getResource("/img/win7.png")).getImage();
         // listener del evento doble click en un elemento del JList
-        archivosJList.addMouseListener(new MouseAdapter() {
+        listaArchivos.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent evt) {
                 JList list = (JList) evt.getSource();
                 java.awt.Rectangle r = list.getCellBounds(0, list.getLastVisibleIndex());
@@ -125,24 +116,27 @@ public class Escritorio extends javax.swing.JFrame {
                             int index = list.getSelectedIndex();
                             ListModel model = list.getModel();
                             File f = (File) model.getElementAt(index);
-                            String nombreDeArchivo = filesys.getSystemDisplayName(f).toLowerCase();
-                            
+                            String nombreDeArchivo = fsv.getSystemDisplayName(f).toLowerCase();
+
                             System.out.println(nombreDeArchivo);
-                            System.out.println(System.getProperty("user.name")); 
-                            
+                            System.out.println(System.getProperty("user.name"));
+
                             if (nombreDeArchivo.contains("equipo")) {
-                                MiEquipo miEquipo = new MiEquipo();
+                                File[] archivosIniciales = File.listRoots();
+                                ImageIcon iconoEquipo = new ImageIcon(getClass().getResource("/img/equipo-icon.png"));
+                                Explorador miEquipo = new Explorador(archivosIniciales, "Equipo", iconoEquipo);
+
                                 escritorio.add(miEquipo);
                                 miEquipo.show();
                             } else if (nombreDeArchivo.contains("reciclaje")) {
                                 PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
                                 escritorio.add(papeleraReciclaje);
                                 papeleraReciclaje.show();
-                            }else if(nombreDeArchivo.contains(System.getProperty("user.name").toLowerCase())){
-                                Documentos documentos = new Documentos();
+                            } else if (nombreDeArchivo.contains(System.getProperty("user.name").toLowerCase())) {
+                                Explorador documentos = new Explorador();
                                 escritorio.add(documentos);
                                 documentos.show();
-                            }else{
+                            } else {
                                 Desktop d = Desktop.getDesktop();
                                 try {
                                     d.browse(f.toURI());
@@ -176,7 +170,7 @@ public class Escritorio extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Date d = new Date();
-                fechaHoraLabel.setText("<html>" + sdf1.format(d) + " <br>" + sdf2.format(d) + "</html>");
+                etiquetaFechaHora.setText("<html>" + sdf1.format(d) + " <br>" + sdf2.format(d) + "</html>");
             }
         };
 
@@ -196,11 +190,11 @@ public class Escritorio extends javax.swing.JFrame {
 
         jPopupMenu1 = new javax.swing.JPopupMenu();
         escritorio = new javax.swing.JDesktopPane();
-        archivosJScrollPane = new javax.swing.JScrollPane();
-        archivosJList = new javax.swing.JList();
+        panelLista = new javax.swing.JScrollPane();
+        listaArchivos = new javax.swing.JList();
         jPanel2 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        fechaHoraLabel = new javax.swing.JLabel();
+        botonInicio = new javax.swing.JButton();
+        etiquetaFechaHora = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Escritorio");
@@ -210,61 +204,61 @@ public class Escritorio extends javax.swing.JFrame {
         escritorio.setBackground(new java.awt.Color(240, 240, 240));
         escritorio.setPreferredSize(new java.awt.Dimension(1200, 550));
 
-        archivosJScrollPane.setBorder(null);
-        archivosJScrollPane.setHorizontalScrollBar(null);
-        archivosJScrollPane.setPreferredSize(new java.awt.Dimension(1200, 550));
+        panelLista.setBorder(null);
+        panelLista.setHorizontalScrollBar(null);
+        panelLista.setPreferredSize(new java.awt.Dimension(1200, 550));
 
-        archivosJList.setPreferredSize(new java.awt.Dimension(1200, 550));
-        archivosJScrollPane.setViewportView(archivosJList);
+        listaArchivos.setPreferredSize(new java.awt.Dimension(1200, 550));
+        panelLista.setViewportView(listaArchivos);
 
         javax.swing.GroupLayout escritorioLayout = new javax.swing.GroupLayout(escritorio);
         escritorio.setLayout(escritorioLayout);
         escritorioLayout.setHorizontalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
+            .addComponent(panelLista, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
         );
         escritorioLayout.setVerticalGroup(
             escritorioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(archivosJScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
+            .addComponent(panelLista, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
         );
-        escritorio.setLayer(archivosJScrollPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        escritorio.setLayer(panelLista, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         jPanel2.setBackground(new java.awt.Color(51, 153, 255));
         jPanel2.setPreferredSize(new java.awt.Dimension(1200, 50));
 
-        jButton1.setBackground(new java.awt.Color(153, 153, 255));
-        jButton1.setForeground(new java.awt.Color(153, 153, 255));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/win-start-icon-50x50.png"))); // NOI18N
-        jButton1.setBorder(null);
-        jButton1.setBorderPainted(false);
-        jButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jButton1.setFocusable(false);
-        jButton1.setPreferredSize(new java.awt.Dimension(50, 50));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        botonInicio.setBackground(new java.awt.Color(153, 153, 255));
+        botonInicio.setForeground(new java.awt.Color(153, 153, 255));
+        botonInicio.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/win-start-icon-50x50.png"))); // NOI18N
+        botonInicio.setBorder(null);
+        botonInicio.setBorderPainted(false);
+        botonInicio.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        botonInicio.setFocusable(false);
+        botonInicio.setPreferredSize(new java.awt.Dimension(50, 50));
+        botonInicio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                botonInicioActionPerformed(evt);
             }
         });
 
-        fechaHoraLabel.setForeground(new java.awt.Color(255, 255, 255));
-        fechaHoraLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        etiquetaFechaHora.setForeground(new java.awt.Color(255, 255, 255));
+        etiquetaFechaHora.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(botonInicio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(fechaHoraLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(etiquetaFechaHora, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
-                    .addComponent(fechaHoraLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(botonInicio, javax.swing.GroupLayout.DEFAULT_SIZE, 51, Short.MAX_VALUE)
+                    .addComponent(etiquetaFechaHora, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -286,7 +280,7 @@ public class Escritorio extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void botonInicioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonInicioActionPerformed
         jPopupMenu1.removeAll();
         this.repaint();
 
@@ -299,8 +293,8 @@ public class Escritorio extends javax.swing.JFrame {
             jPopupMenu1.add(ex);
         }
 
-        jPopupMenu1.show(jButton1, 0, -jPopupMenu1.getPreferredSize().height);
-    }//GEN-LAST:event_jButton1ActionPerformed
+        jPopupMenu1.show(botonInicio, 0, -jPopupMenu1.getPreferredSize().height);
+    }//GEN-LAST:event_botonInicioActionPerformed
 
     /**
      * @param args the command line arguments
@@ -338,12 +332,12 @@ public class Escritorio extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JList archivosJList;
-    private javax.swing.JScrollPane archivosJScrollPane;
+    private javax.swing.JButton botonInicio;
     private javax.swing.JDesktopPane escritorio;
-    private javax.swing.JLabel fechaHoraLabel;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel etiquetaFechaHora;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JList listaArchivos;
+    private javax.swing.JScrollPane panelLista;
     // End of variables declaration//GEN-END:variables
 }
