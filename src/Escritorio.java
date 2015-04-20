@@ -36,6 +36,7 @@ public class Escritorio extends javax.swing.JFrame {
 
     FileSystemView fsv = FileSystemView.getFileSystemView();
     Vector<File> escritorioArchivos = new Vector();
+    String nombreUsuario;
 
     /**
      * Creates new form Escritorio
@@ -70,33 +71,22 @@ public class Escritorio extends javax.swing.JFrame {
         clickDerechoOutMenu.addSeparator();
         clickDerechoOutMenu.add(pegarItem);
 
-        //Uno antes debe ir mi equipo
-        //Mis documentos
-        String pathDocumentos = System.getProperty("user.home");
-        File documentos = new File(pathDocumentos);
-        escritorioArchivos.add(documentos);
+        this.nombreUsuario = System.getProperty("user.home").substring(9);
 
         //Papelera
         File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
-        escritorioArchivos.add(papelera);
+        this.escritorioArchivos.add(papelera);
 
-        //Red
-        File red;
-
-        //Iconos de escritorio
-        String pathDesktop = System.getProperty("user.home") + "/Desktop";
-        File escritorioDirectorio = new File(pathDesktop);
-        //File files[] = escritorioDirectorio.listFiles();
         File[] files = fsv.getHomeDirectory().listFiles();
 
         for (int i = 0; i < files.length; i++) {
-            //if (!fsv.isHiddenFile(files[i])) {
-            escritorioArchivos.add(files[i]);
-            //}
+            if (!files[i].isHidden()) {
+                this.escritorioArchivos.add(files[i]);
+            }
         }
 
         // JList de archivos del escritorio
-        listaArchivos.setListData(escritorioArchivos);
+        listaArchivos.setListData(this.escritorioArchivos);
         listaArchivos.setCellRenderer(new EscritorioCellRenderer());
         listaArchivos.setVisibleRowCount(0);
         listaArchivos.setLayoutOrientation(JList.HORIZONTAL_WRAP);
@@ -110,36 +100,34 @@ public class Escritorio extends javax.swing.JFrame {
 
                 if (r.contains(evt.getPoint())) {
                     if (SwingUtilities.isLeftMouseButton(evt)) {
-                        //r != null
                         if (evt.getClickCount() == 2) {
-                            //int index = list.locationToIndex(evt.getPoint());
                             int index = list.getSelectedIndex();
-                            ListModel model = list.getModel();
-                            File f = (File) model.getElementAt(index);
-                            String nombreDeArchivo = fsv.getSystemDisplayName(f).toLowerCase();
-
+                            File archivoSeleccionado = (File) list.getModel().getElementAt(index);
+                            String nombreDeArchivo = fsv.getSystemDisplayName(archivoSeleccionado).toLowerCase();
                             System.out.println(nombreDeArchivo);
-                            System.out.println(System.getProperty("user.name"));
 
                             if (nombreDeArchivo.contains("equipo")) {
-                                File[] archivosIniciales = File.listRoots();
                                 ImageIcon iconoEquipo = new ImageIcon(getClass().getResource("/img/equipo-icon.png"));
-                                Explorador miEquipo = new Explorador(archivosIniciales, "Equipo", iconoEquipo);
-
+                                Explorador miEquipo = new Explorador(archivoSeleccionado, iconoEquipo, "Equipo");
                                 escritorio.add(miEquipo);
                                 miEquipo.show();
                             } else if (nombreDeArchivo.contains("reciclaje")) {
                                 PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
                                 escritorio.add(papeleraReciclaje);
                                 papeleraReciclaje.show();
-                            } else if (nombreDeArchivo.contains(System.getProperty("user.name").toLowerCase())) {
-                                Explorador documentos = new Explorador();
-                                escritorio.add(documentos);
-                                documentos.show();
+                            } else if (nombreDeArchivo.contains(nombreUsuario.toLowerCase())) {
+                                ImageIcon iconoUsuario = new ImageIcon(getClass().getResource("/img/usuario-icon.png"));
+                                Explorador usuarioDirectorio = new Explorador(archivoSeleccionado, iconoUsuario);
+                                escritorio.add(usuarioDirectorio);
+                                usuarioDirectorio.show();
+                            } else if (archivoSeleccionado.isDirectory()) {
+                                Explorador directorio = new Explorador(archivoSeleccionado);
+                                escritorio.add(directorio);
+                                directorio.show();
                             } else {
                                 Desktop d = Desktop.getDesktop();
                                 try {
-                                    d.browse(f.toURI());
+                                    d.open(archivoSeleccionado);
                                 } catch (IOException ex) {
                                     Logger.getLogger(Escritorio.class.getName()).log(Level.SEVERE, null, ex);
                                 }
