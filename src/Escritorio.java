@@ -1,6 +1,5 @@
 
 import java.awt.Desktop;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -13,12 +12,11 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.ListModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileSystemView;
@@ -107,19 +105,18 @@ public class Escritorio extends javax.swing.JFrame {
                             System.out.println(nombreDeArchivo);
 
                             if (nombreDeArchivo.contains("equipo")) {
-                                ImageIcon iconoEquipo = new ImageIcon(getClass().getResource("/img/equipo-icon.png"));
-                                Explorador miEquipo = new Explorador(archivoSeleccionado, iconoEquipo, "Equipo");
+                                Explorador miEquipo = new Explorador(archivoSeleccionado, "Equipo");
                                 escritorio.add(miEquipo);
                                 miEquipo.show();
                             } else if (nombreDeArchivo.contains("reciclaje")) {
                                 PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
                                 escritorio.add(papeleraReciclaje);
                                 papeleraReciclaje.show();
-                            } else if (nombreDeArchivo.contains(nombreUsuario.toLowerCase())) {
-                                ImageIcon iconoUsuario = new ImageIcon(getClass().getResource("/img/usuario-icon.png"));
-                                Explorador usuarioDirectorio = new Explorador(archivoSeleccionado, iconoUsuario);
-                                escritorio.add(usuarioDirectorio);
-                                usuarioDirectorio.show();
+                                /*} else if (nombreDeArchivo.contains(nombreUsuario.toLowerCase())) {
+                                 ImageIcon iconoUsuario = new ImageIcon(getClass().getResource("/img/usuario-icon.png"));
+                                 Explorador usuarioDirectorio = new Explorador(archivoSeleccionado, iconoUsuario);
+                                 escritorio.add(usuarioDirectorio);
+                                 usuarioDirectorio.show();*/
                             } else if (archivoSeleccionado.isDirectory()) {
                                 Explorador directorio = new Explorador(archivoSeleccionado);
                                 escritorio.add(directorio);
@@ -186,6 +183,7 @@ public class Escritorio extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Escritorio");
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setIconImage((new ImageIcon(this.getClass().getResource("/img/desktop-icon-3.png"))).getImage());
         setPreferredSize(new java.awt.Dimension(1218, 646));
 
