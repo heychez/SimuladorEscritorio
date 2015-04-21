@@ -15,7 +15,7 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author Roberto
  */
-class ExploradorCellRenderer extends DefaultTableCellRenderer {
+class ExploradorTableCellRenderer extends DefaultTableCellRenderer {
 
     JLabel label = new JLabel();
 

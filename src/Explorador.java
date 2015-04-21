@@ -87,7 +87,7 @@ public class Explorador extends javax.swing.JInternalFrame {
 
         initComponents();
 
-        tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorCellRenderer());
+        tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorTableCellRenderer());
         directoriosVisitados.add(directorioInicial);
 
         colocarArchivosTabla(directorioInicial);
@@ -96,10 +96,8 @@ public class Explorador extends javax.swing.JInternalFrame {
         tablaArchivos.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent evt) {
                 JTable tabla = (JTable) evt.getSource();
-                //java.awt.Rectangle r = tabla.getCellBounds(0, tabla.getLastVisibleIndex());
                 Point p = evt.getPoint();
                 int nroFila = tabla.rowAtPoint(p);
-                //if (r.contains(evt.getPoint())) {
                 if (SwingUtilities.isLeftMouseButton(evt)) {
                     if (evt.getClickCount() == 2) {
                         File archivoSeleccionado = archivosActuales.elementAt(nroFila);
@@ -123,11 +121,10 @@ public class Explorador extends javax.swing.JInternalFrame {
                     tabla.setRowSelectionInterval(nroFila, nroFila);
                     clickDerechoMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                 }
-                //}
             }
         });
 
-        arbolArchivos.setCellRenderer(new MyTreeCellRenderer());
+        arbolArchivos.setCellRenderer(new ExploradorTreeCellRenderer());
 
         arbolArchivos.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -410,7 +407,7 @@ public class Explorador extends javax.swing.JInternalFrame {
         if (directorioEntrante == null) {
             System.out.println("ERROR: ruta ingresada invalida.");
         } else {
-            if (directorioEntrante.isDirectory()) {
+            if (directorioEntrante.isDirectory() || fsv.isDrive(directorioEntrante)) {
                 directoriosVisitados.setSize(indiceDirectorioActual + 1);
                 directoriosVisitados.add(directorioEntrante);
                 indiceDirectorioActual++;

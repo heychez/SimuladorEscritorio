@@ -18,11 +18,11 @@ import javax.swing.tree.TreeCellRenderer;
  *
  * @author Roberto
  */
-public class MyTreeCellRenderer implements TreeCellRenderer {
+public class ExploradorTreeCellRenderer implements TreeCellRenderer {
 
     private JLabel label;
 
-    MyTreeCellRenderer() {
+    ExploradorTreeCellRenderer() {
         label = new JLabel();
     }
 

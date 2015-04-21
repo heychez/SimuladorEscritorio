@@ -16,7 +16,7 @@ import javax.swing.filechooser.FileSystemView;
  *
  * @author Roberto
  */
-public class EscritorioCellRenderer extends JLabel implements ListCellRenderer {
+public class EscritorioListCellRenderer extends JLabel implements ListCellRenderer {
 
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {

@@ -85,7 +85,7 @@ public class Escritorio extends javax.swing.JFrame {
 
         // JList de archivos del escritorio
         listaArchivos.setListData(this.escritorioArchivos);
-        listaArchivos.setCellRenderer(new EscritorioCellRenderer());
+        listaArchivos.setCellRenderer(new EscritorioListCellRenderer());
         listaArchivos.setVisibleRowCount(0);
         listaArchivos.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
@@ -108,15 +108,18 @@ public class Escritorio extends javax.swing.JFrame {
                                 Explorador miEquipo = new Explorador(archivoSeleccionado, "Equipo");
                                 escritorio.add(miEquipo);
                                 miEquipo.show();
+                            } else if (nombreDeArchivo.contains("bibliotecas")) {
+                                Explorador miEquipo = new Explorador(archivoSeleccionado, "Bibliotecas");
+                                escritorio.add(miEquipo);
+                                miEquipo.show();
+                            } else if (nombreDeArchivo.contains("red")) {
+                                Explorador miEquipo = new Explorador(archivoSeleccionado, "Red");
+                                escritorio.add(miEquipo);
+                                miEquipo.show();
                             } else if (nombreDeArchivo.contains("reciclaje")) {
                                 PapeleraReciclaje papeleraReciclaje = new PapeleraReciclaje();
                                 escritorio.add(papeleraReciclaje);
                                 papeleraReciclaje.show();
-                                /*} else if (nombreDeArchivo.contains(nombreUsuario.toLowerCase())) {
-                                 ImageIcon iconoUsuario = new ImageIcon(getClass().getResource("/img/usuario-icon.png"));
-                                 Explorador usuarioDirectorio = new Explorador(archivoSeleccionado, iconoUsuario);
-                                 escritorio.add(usuarioDirectorio);
-                                 usuarioDirectorio.show();*/
                             } else if (archivoSeleccionado.isDirectory()) {
                                 Explorador directorio = new Explorador(archivoSeleccionado);
                                 escritorio.add(directorio);

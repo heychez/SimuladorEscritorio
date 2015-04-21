@@ -35,7 +35,7 @@ public class PapeleraReciclaje extends javax.swing.JInternalFrame {
             
         }
         jList1.setListData(papeleraArchivos);
-        jList1.setCellRenderer(new EscritorioCellRenderer());
+        jList1.setCellRenderer(new EscritorioListCellRenderer());
         jList1.setVisibleRowCount(0);
         jList1.setLayoutOrientation(JList.HORIZONTAL_WRAP);
         
