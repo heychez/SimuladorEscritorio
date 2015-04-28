@@ -106,7 +106,7 @@
                     <Column editable="false" title="Nombre" type="java.lang.String"/>
                     <Column editable="false" title="Fecha de modificacion" type="java.lang.String"/>
                     <Column editable="false" title="Tipo" type="java.lang.String"/>
-                    <Column editable="false" title="Tama&#xf1;o" type="java.lang.String"/>
+                    <Column editable="false" title="Tama&#xf1;o" type="java.lang.Object"/>
                   </Table>
                 </Property>
                 <Property name="autoResizeMode" type="int" value="4"/>

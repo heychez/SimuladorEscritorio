@@ -107,15 +107,16 @@ public class Explorador extends javax.swing.JInternalFrame {
 
         initComponents();
 
-        tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorTableCellRenderer());
+        tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorIconTableCellRenderer());
+        tablaArchivos.getColumnModel().getColumn(4).setCellRenderer(new ExploradorProgressBarTableCellRenderer());
         directoriosVisitados.add(directorioInicial);
         campoRuta.setText(ruta);
 
-        colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual));
+        colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual), true);
         ActionListener colocarArchivosTablaListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual));
+                colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual), false);
             }
         };
         Timer t = new Timer(5000, colocarArchivosTablaListener);
@@ -129,7 +130,7 @@ public class Explorador extends javax.swing.JInternalFrame {
                     directoriosVisitados.add(archivoTablaSeleccionado);
                     indiceDirectorioActual++;
 
-                    colocarArchivosTabla(archivoTablaSeleccionado);
+                    colocarArchivosTabla(archivoTablaSeleccionado, true);
                     return;
                 } else {
                     Desktop d = Desktop.getDesktop();
@@ -223,7 +224,7 @@ public class Explorador extends javax.swing.JInternalFrame {
                             directoriosVisitados.add(archivoSeleccionado);
                             indiceDirectorioActual++;
 
-                            colocarArchivosTabla(archivoSeleccionado);
+                            colocarArchivosTabla(archivoSeleccionado, true);
                             return;
                         } else {
                             Desktop d = Desktop.getDesktop();
@@ -271,7 +272,7 @@ public class Explorador extends javax.swing.JInternalFrame {
                             directoriosVisitados.add(f);
                             indiceDirectorioActual++;
 
-                            colocarArchivosTabla(f);
+                            colocarArchivosTabla(f, true);
                         }
                     }
                 }
@@ -279,7 +280,7 @@ public class Explorador extends javax.swing.JInternalFrame {
         });
     }
 
-    private void colocarArchivosTabla(File directorio) {
+    private void colocarArchivosTabla(File directorio, boolean cambiarRuta) {
         archivosActuales.clear();
 
         File[] archivos = directorio.listFiles();
@@ -296,13 +297,19 @@ public class Explorador extends javax.swing.JInternalFrame {
                 v.add(fsv.getSystemTypeDescription(archivos[i]));
 
                 if (fsv.isDrive(archivos[i])) {
-                    v.add(bytesAKBs(archivos[i].getTotalSpace() / (1024 * 1024 * 1024), " GB"));
+                    v.add("");
+                    //v.add(bytesAKBs(archivos[i].getTotalSpace() / (1024 * 1024 * 1024), " GB"));
                 } else {
                     v.add(bytesAKBs(archivos[i].length() / (1024), " KB"));
                 }
 
                 dtm.addRow(v);
                 dtm.setValueAt(fsv.getSystemIcon(archivos[i]), dtm.getRowCount() - 1, 0);
+
+                if (fsv.isDrive(archivos[i]) && archivos[i].getTotalSpace() != 0) {
+                    int porcentajeUsado = 100 - (int) (archivos[i].getUsableSpace() * 100 / archivos[i].getTotalSpace());
+                    dtm.setValueAt(new Integer(porcentajeUsado), dtm.getRowCount() - 1, 4);
+                }
 
                 archivosActuales.add(archivos[i]);
             }
@@ -324,8 +331,9 @@ public class Explorador extends javax.swing.JInternalFrame {
             col.setPreferredWidth(width + 2);
         }
 
-        // poer la ruta actual
-        campoRuta.setText(directorio.getPath());
+        if (cambiarRuta) {
+            campoRuta.setText(directorio.getPath());
+        }
 
         // llenar el arbol de archivos
         colocarArchivosArbol(directorio);
@@ -406,7 +414,7 @@ public class Explorador extends javax.swing.JInternalFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false
@@ -529,7 +537,7 @@ public class Explorador extends javax.swing.JInternalFrame {
                 directoriosVisitados.add(directorioEntrante);
                 indiceDirectorioActual++;
 
-                colocarArchivosTabla(directorioEntrante);
+                colocarArchivosTabla(directorioEntrante, true);
             } else {
                 Desktop d = Desktop.getDesktop();
                 try {
@@ -544,14 +552,14 @@ public class Explorador extends javax.swing.JInternalFrame {
     private void botonAtrasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonAtrasActionPerformed
         if (indiceDirectorioActual > 0) {
             indiceDirectorioActual--;
-            colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual));
+            colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual), true);
         }
     }//GEN-LAST:event_botonAtrasActionPerformed
 
     private void botonAdelanteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonAdelanteActionPerformed
         if (indiceDirectorioActual < directoriosVisitados.size() - 1) {
             indiceDirectorioActual++;
-            colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual));
+            colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual), true);
         }
     }//GEN-LAST:event_botonAdelanteActionPerformed
 

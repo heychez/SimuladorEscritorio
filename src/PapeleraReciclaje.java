@@ -57,7 +57,7 @@ public class PapeleraReciclaje extends javax.swing.JInternalFrame {
         clickDerechoMenu.add(eliminarItem);
         
         initComponents();
-        tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorTableCellRenderer());
+        tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorIconTableCellRenderer());
         colocarArchivosTabla(papelera);
         
         tablaArchivos.addMouseListener(new MouseAdapter() {

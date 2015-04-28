@@ -6,6 +6,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
@@ -16,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -35,33 +38,37 @@ public class Escritorio extends javax.swing.JFrame {
     FileSystemView fsv = FileSystemView.getFileSystemView();
     Vector<File> escritorioArchivos = new Vector();
     String nombreUsuario;
+    File archivoListaSeleccionado;
+    File archivoCopiado = null;
+    boolean esArchivoCortado = false;
+
+    JPopupMenu clickDerechoInMenu = new JPopupMenu();
+    JMenuItem abrirItem = new JMenuItem("Abrir");
+    JMenuItem cortarItem = new JMenuItem("Cortar");
+    JMenuItem copiarItem = new JMenuItem("Copiar");
+    JMenuItem eliminarItem = new JMenuItem("Eliminar");
+    JPopupMenu clickDerechoOutMenu = new JPopupMenu();
+    JMenu nuevoItem = new JMenu("Nuevo");
+    JMenuItem nuevaCarpetaItem = new JMenuItem("Carpeta");
+    JMenuItem pegarItem = new JMenuItem("Pegar");
 
     /**
      * Creates new form Escritorio
      */
     public Escritorio() {
-        initComponents();
-
-        JPopupMenu clickDerechoInMenu = new JPopupMenu();
-        JMenuItem abrirItem = new JMenuItem("Abrir");
-        JMenuItem cortarItem = new JMenuItem("Cortar");
-        JMenuItem copiarItem = new JMenuItem("Copiar");
-        JMenuItem eliminarItem = new JMenuItem("Eliminar");
         clickDerechoInMenu.add(abrirItem);
         clickDerechoInMenu.addSeparator();
         clickDerechoInMenu.add(cortarItem);
         clickDerechoInMenu.add(copiarItem);
         clickDerechoInMenu.add(eliminarItem);
 
-        JPopupMenu clickDerechoOutMenu = new JPopupMenu();
-        JMenu nuevoItem = new JMenu("Nuevo");
-        JMenuItem nuevaCarpetaItem = new JMenuItem("Carpeta");
-        JMenuItem pegarItem = new JMenuItem("Pegar");
         clickDerechoOutMenu.add(nuevoItem);
         nuevoItem.add(nuevaCarpetaItem);
         clickDerechoOutMenu.addSeparator();
         clickDerechoOutMenu.add(pegarItem);
         pegarItem.setEnabled(false);
+
+        initComponents();
 
         this.nombreUsuario = System.getProperty("user.home").substring(9);
 
@@ -75,25 +82,111 @@ public class Escritorio extends javax.swing.JFrame {
         Timer t1 = new Timer(5000, colocarArchivosEscritorioListener);
         t1.start();
 
+        abrirItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (archivoListaSeleccionado.isDirectory()) {
+                    Explorador directorio = new Explorador(archivoListaSeleccionado);
+                    escritorio.add(directorio);
+                    directorio.show();
+                    return;
+                } else {
+                    Desktop d = Desktop.getDesktop();
+                    try {
+                        d.open(archivoListaSeleccionado);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
+
+        nuevaCarpetaItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nombre = JOptionPane.showInputDialog("Crear nueva carpeta");
+                if (nombre != null) {
+                    String path = fsv.getHomeDirectory().getPath();
+                    File nuevaCarpeta = new File(path + "/" + nombre);
+                    if (nuevaCarpeta.exists()) {
+                        System.out.println("ERROR: El nombre de la carpeta ya existe.");
+                    } else {
+                        nuevaCarpeta.mkdir();
+                    }
+                }
+            }
+        });
+
+        copiarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                archivoCopiado = archivoListaSeleccionado;
+                esArchivoCortado = false;
+                pegarItem.setEnabled(true);
+            }
+        });
+
+        cortarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                archivoCopiado = archivoListaSeleccionado;
+                esArchivoCortado = true;
+                pegarItem.setEnabled(true);
+            }
+        });
+
+        pegarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String carpetaActual = fsv.getHomeDirectory().getPath();
+                    String nuevoArchivoUbicacion = carpetaActual + File.separator + archivoCopiado.getName();
+                    Files.copy(archivoCopiado.toPath(), new File(nuevoArchivoUbicacion).toPath());
+
+                    if (esArchivoCortado) {
+                        try {
+                            Files.delete(archivoCopiado.toPath());
+                            esArchivoCortado = false;
+                            pegarItem.setEnabled(false);
+                        } catch (IOException ex) {
+                            Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        eliminarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Files.delete(archivoListaSeleccionado.toPath());
+                } catch (IOException ex) {
+                    Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
         listaArchivos.setCellRenderer(new EscritorioListCellRenderer());
         listaArchivos.setVisibleRowCount(0);
         listaArchivos.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 
         //Image fondo = new ImageIcon(this.getClass().getResource("/img/win7.png")).getImage();
-        // listener del evento doble click en un elemento del JList
         listaArchivos.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent evt) {
                 JList list = (JList) evt.getSource();
                 java.awt.Rectangle r = list.getCellBounds(0, list.getLastVisibleIndex());
 
                 if (r.contains(evt.getPoint())) {
+                    int index = list.getSelectedIndex();
+
                     if (SwingUtilities.isLeftMouseButton(evt)) {
                         if (evt.getClickCount() == 2) {
-                            int index = list.getSelectedIndex();
                             File archivoSeleccionado = (File) list.getModel().getElementAt(index);
                             String nombreDeArchivo = fsv.getSystemDisplayName(archivoSeleccionado).toLowerCase();
-                            System.out.println(nombreDeArchivo);
-
+                            
                             if (nombreDeArchivo.contains("equipo")) {
                                 Explorador miEquipo = new Explorador(archivoSeleccionado, "Equipo");
                                 escritorio.add(miEquipo);
@@ -126,8 +219,10 @@ public class Escritorio extends javax.swing.JFrame {
                         }
                     } else { //click derecho
                         if (evt.getClickCount() == 1) {
-                            int index = list.locationToIndex(evt.getPoint());
-                            list.setSelectedIndex(index);
+                            int i = list.locationToIndex(evt.getPoint());
+                            list.setSelectedIndex(i);
+
+                            archivoListaSeleccionado = (File) list.getModel().getElementAt(index);
 
                             clickDerechoInMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                         }
