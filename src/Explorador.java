@@ -1,23 +1,34 @@
 
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.FlowLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileSystemView;
@@ -29,6 +40,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import static jdk.nashorn.internal.objects.NativeRegExp.source;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -48,6 +60,17 @@ public class Explorador extends javax.swing.JInternalFrame {
     Vector<File> archivosActuales = new Vector();
     Vector<File> directoriosVisitados = new Vector();
     int indiceDirectorioActual = 0;
+    File archivoTablaSeleccionado = null;
+    File archivoCopiado = null;
+    boolean esArchivoCortado = false;
+
+    JPopupMenu clickDerechoMenu = new JPopupMenu();
+    JMenuItem abrirItem = new JMenuItem("Abrir");
+    JMenuItem nuevaCarpetaItem = new JMenuItem("Nueva carpeta");
+    JMenuItem copiarItem = new JMenuItem("Copiar");
+    JMenuItem cortarItem = new JMenuItem("Cortar");
+    JMenuItem pegarItem = new JMenuItem("Pegar");
+    JMenuItem eliminarItem = new JMenuItem("Eliminar");
 
     /**
      * Creates new form MiEquipo
@@ -72,16 +95,13 @@ public class Explorador extends javax.swing.JInternalFrame {
         this.ventanaIcono = ventanaIcono;
         this.ventanaTitulo = fsv.getSystemDisplayName(directorioInicial);
 
-        JPopupMenu clickDerechoMenu = new JPopupMenu();
-        JMenuItem abrirItem = new JMenuItem("Abrir");
-        JMenuItem cortarItem = new JMenuItem("Cortar");
-        JMenuItem copiarItem = new JMenuItem("Copiar");
-        JMenuItem pegarItem = new JMenuItem("Pegar");
-        JMenuItem eliminarItem = new JMenuItem("Eliminar");
         clickDerechoMenu.add(abrirItem);
         clickDerechoMenu.addSeparator();
-        clickDerechoMenu.add(cortarItem);
+        clickDerechoMenu.add(nuevaCarpetaItem);
+        clickDerechoMenu.addSeparator();
         clickDerechoMenu.add(copiarItem);
+        clickDerechoMenu.add(cortarItem);
+        clickDerechoMenu.add(pegarItem);
         clickDerechoMenu.add(eliminarItem);
         pegarItem.setEnabled(false);
 
@@ -89,18 +109,115 @@ public class Explorador extends javax.swing.JInternalFrame {
 
         tablaArchivos.getColumnModel().getColumn(0).setCellRenderer(new ExploradorTableCellRenderer());
         directoriosVisitados.add(directorioInicial);
-
-        colocarArchivosTabla(directorioInicial);
         campoRuta.setText(ruta);
+
+        colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual));
+        ActionListener colocarArchivosTablaListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                colocarArchivosTabla(directoriosVisitados.elementAt(indiceDirectorioActual));
+            }
+        };
+        Timer t = new Timer(5000, colocarArchivosTablaListener);
+        t.start();
+
+        abrirItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (archivoTablaSeleccionado.isDirectory()) {
+                    directoriosVisitados.setSize(indiceDirectorioActual + 1);
+                    directoriosVisitados.add(archivoTablaSeleccionado);
+                    indiceDirectorioActual++;
+
+                    colocarArchivosTabla(archivoTablaSeleccionado);
+                    return;
+                } else {
+                    Desktop d = Desktop.getDesktop();
+                    try {
+                        d.open(archivoTablaSeleccionado);
+                    } catch (IOException ex) {
+                        Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
+
+        nuevaCarpetaItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nombre = JOptionPane.showInputDialog("Crear nueva carpeta");
+                if (nombre != null) {
+                    String path = directoriosVisitados.elementAt(indiceDirectorioActual).getPath();
+                    File nuevaCarpeta = new File(path + "/" + nombre);
+                    if (nuevaCarpeta.exists()) {
+                        System.out.println("ERROR: El nombre de la carpeta ya existe.");
+                    } else {
+                        nuevaCarpeta.mkdir();
+                    }
+                }
+            }
+        });
+
+        copiarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                archivoCopiado = archivoTablaSeleccionado;
+                esArchivoCortado = false;
+                pegarItem.setEnabled(true);
+            }
+        });
+
+        cortarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                archivoCopiado = archivoTablaSeleccionado;
+                esArchivoCortado = true;
+                pegarItem.setEnabled(true);
+            }
+        });
+
+        pegarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String carpetaActual = directoriosVisitados.elementAt(indiceDirectorioActual).getPath();
+                    String nuevoArchivoUbicacion = carpetaActual + File.separator + archivoCopiado.getName();
+                    Files.copy(archivoCopiado.toPath(), new File(nuevoArchivoUbicacion).toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+                    if (esArchivoCortado) {
+                        try {
+                            Files.delete(archivoCopiado.toPath());
+                            esArchivoCortado = false;
+                            pegarItem.setEnabled(false);
+                        } catch (IOException ex) {
+                            Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        eliminarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Files.delete(archivoTablaSeleccionado.toPath());
+                } catch (IOException ex) {
+                    Logger.getLogger(Explorador.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
 
         tablaArchivos.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent evt) {
                 JTable tabla = (JTable) evt.getSource();
                 Point p = evt.getPoint();
                 int nroFila = tabla.rowAtPoint(p);
+                File archivoSeleccionado = archivosActuales.elementAt(nroFila);
                 if (SwingUtilities.isLeftMouseButton(evt)) {
                     if (evt.getClickCount() == 2) {
-                        File archivoSeleccionado = archivosActuales.elementAt(nroFila);
                         if (archivoSeleccionado.isDirectory()) {
                             directoriosVisitados.setSize(indiceDirectorioActual + 1);
                             directoriosVisitados.add(archivoSeleccionado);
@@ -119,6 +236,7 @@ public class Explorador extends javax.swing.JInternalFrame {
                     }
                 } else { //click derecho
                     tabla.setRowSelectionInterval(nroFila, nroFila);
+                    archivoTablaSeleccionado = archivoSeleccionado;
                     clickDerechoMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                 }
             }
@@ -309,7 +427,6 @@ public class Explorador extends javax.swing.JInternalFrame {
         tablaArchivos.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         tablaArchivos.setShowHorizontalLines(false);
         tablaArchivos.setShowVerticalLines(false);
-        tablaArchivos.getTableHeader().setResizingAllowed(false);
         tablaArchivos.getTableHeader().setReorderingAllowed(false);
         panelTabla.setViewportView(tablaArchivos);
 

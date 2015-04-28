@@ -56,35 +56,25 @@ public class Escritorio extends javax.swing.JFrame {
         JPopupMenu clickDerechoOutMenu = new JPopupMenu();
         JMenu nuevoItem = new JMenu("Nuevo");
         JMenuItem nuevaCarpetaItem = new JMenuItem("Carpeta");
-        JMenuItem nuevoAccesoDirectoItem = new JMenuItem("Acceso directo");
-        JMenuItem nuevoWordItem = new JMenuItem("Documento Word");
-        JMenuItem nuevoExcelItem = new JMenuItem("Documento Excel");
         JMenuItem pegarItem = new JMenuItem("Pegar");
         clickDerechoOutMenu.add(nuevoItem);
         nuevoItem.add(nuevaCarpetaItem);
-        nuevoItem.add(nuevoAccesoDirectoItem);
-        nuevoItem.addSeparator();
-        nuevoItem.add(nuevoWordItem);
-        nuevoItem.add(nuevoExcelItem);
         clickDerechoOutMenu.addSeparator();
         clickDerechoOutMenu.add(pegarItem);
+        pegarItem.setEnabled(false);
 
         this.nombreUsuario = System.getProperty("user.home").substring(9);
 
-        //Papelera
-        File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
-        this.escritorioArchivos.add(papelera);
-
-        File[] files = fsv.getHomeDirectory().listFiles();
-
-        for (int i = 0; i < files.length; i++) {
-            if (!files[i].isHidden()) {
-                this.escritorioArchivos.add(files[i]);
+        colocarArchivosEscritorio();
+        ActionListener colocarArchivosEscritorioListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                colocarArchivosEscritorio();
             }
-        }
+        };
+        Timer t1 = new Timer(5000, colocarArchivosEscritorioListener);
+        t1.start();
 
-        // JList de archivos del escritorio
-        listaArchivos.setListData(this.escritorioArchivos);
         listaArchivos.setCellRenderer(new EscritorioListCellRenderer());
         listaArchivos.setVisibleRowCount(0);
         listaArchivos.setLayoutOrientation(JList.HORIZONTAL_WRAP);
@@ -154,6 +144,7 @@ public class Escritorio extends javax.swing.JFrame {
         ///Reloj de Barra
         SimpleDateFormat sdf1 = new SimpleDateFormat("HH:mm a");
         SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
+
         ActionListener updateClock = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -161,10 +152,27 @@ public class Escritorio extends javax.swing.JFrame {
                 etiquetaFechaHora.setText("<html>" + sdf1.format(d) + " <br>" + sdf2.format(d) + "</html>");
             }
         };
+        Timer t2 = new Timer(1000, updateClock);
+        t2.start();
 
-        Timer t = new Timer(1000, updateClock);
-        t.start();
+    }
 
+    private void colocarArchivosEscritorio() {
+        escritorioArchivos.removeAllElements();
+
+        //Papelera
+        File papelera = (new File("C:/$Recycle.Bin")).listFiles()[0];
+        escritorioArchivos.add(papelera);
+
+        File[] files = fsv.getHomeDirectory().listFiles();
+
+        for (int i = 0; i < files.length; i++) {
+            if (!files[i].isHidden()) {
+                escritorioArchivos.add(files[i]);
+            }
+        }
+
+        listaArchivos.setListData(escritorioArchivos);
     }
 
     /**
